@@ -63,6 +63,55 @@ app.post('/items', async (req, res) => {
   }
 });
 app.get('/', (req, res) => res.json({ message: 'RUN Market Backend Working!' }));
+// PUT ITEM - only owner, fit mark as sold or edit
+app.put('/items/:id', async (req, res) => {
+  const { title, description, price, image_url, status } = req.body;
+  try {
+    const [result] = await db.query(
+      'UPDATE items SET title = COALESCE(?, title), description = COALESCE(?, description), price = COALESCE(?, price), image_url = COALESCE(?, image_url), status = COALESCE(?, status) WHERE id = ?',
+      [title, description, price, image_url, status, req.params.id]
+    );
+    if (result.affectedRows === 0) return res.status(404).json({ error: 'Item not found' });
+    res.json({ message: 'Item updated successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
+// DELETE ITEM - only owner
+app.delete('/items/:id', async (req, res) => {
+  try {
+    const [result] = await db.query('DELETE FROM items WHERE id = ?', [req.params.id]);
+    if (result.affectedRows === 0) return res.status(404).json({ error: 'Item not found' });
+    res.json({ message: 'Item deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+// PUT ITEM - update item / mark as sold
+app.put('/items/:id', async (req, res) => {
+  const { title, description, price, image_url, status } = req.body;
+  try {
+    const [result] = await db.query(
+      'UPDATE items SET title = COALESCE(?, title), description = COALESCE(?, description), price = COALESCE(?, price), image_url = COALESCE(?, image_url), status = COALESCE(?, status) WHERE id = ?',
+      [title, description, price, image_url, status, req.params.id]
+    );
+    if (result.affectedRows === 0) return res.status(404).json({ error: 'Item not found' });
+    res.json({ message: 'Item updated successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE ITEM
+app.delete('/items/:id', async (req, res) => {
+  try {
+    const [result] = await db.query('DELETE FROM items WHERE id = ?', [req.params.id]);
+    if (result.affectedRows === 0) return res.status(404).json({ error: 'Item not found' });
+    res.json({ message: 'Item deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
